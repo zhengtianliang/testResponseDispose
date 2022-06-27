@@ -32,7 +32,6 @@ public class UserConverterConfig extends AbstractHttpMessageConverter<User> {
         super(new MediaType("application","type-t",Charset.forName("UTF-8")));
     }
 
-
     @Override
     protected boolean supports(Class<?> aClass) {
         // 只处理返回值是user对象的方法
