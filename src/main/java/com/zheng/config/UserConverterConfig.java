@@ -58,7 +58,7 @@ public class UserConverterConfig extends AbstractHttpMessageConverter<User> {
     protected void writeInternal(User user, HttpOutputMessage httpOutputMessage) throws IOException, HttpMessageNotWritableException {
         String msg = "自定义一个类型application/json 名称："+user.getName()+"内容："+user.getBody();
         logger.info("writeInternal ... start : "+msg);
-        msg = msg.concat("此次做出的强化的处理。");
+        msg = msg.concat("此次做出的强化的处理23423423424。");
         httpOutputMessage.getBody().write(msg.getBytes("UTF-8"));
     }
 }
