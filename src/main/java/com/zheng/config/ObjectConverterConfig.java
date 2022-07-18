@@ -1,6 +1,7 @@
 package com.zheng.config;
 
 import com.alibaba.fastjson.JSON;
+import com.zheng.encry.MD5Util;
 import com.zheng.encry.RSAUtil;
 import com.zheng.pojo.User;
 import org.slf4j.Logger;
@@ -14,12 +15,17 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
 
 /**
  * @author: ZhengTianLiang
@@ -34,6 +40,10 @@ public class ObjectConverterConfig extends AbstractHttpMessageConverter<Object> 
 
     private static final String publicKeyStr;
     private static final String privateKeyStr;
+    // 免5秒url校验的请求url的集合
+    final static ArrayList<String> urls = new ArrayList();
+
+
 
     static {
         //生成RSA公钥和私钥，并Base64编码
@@ -47,6 +57,11 @@ public class ObjectConverterConfig extends AbstractHttpMessageConverter<Object> 
         privateKeyStr = RSAUtil.getPrivateKey(keyPair);
         System.out.println("静态代码块_RSA公钥Base64编码:" + publicKeyStr);
         System.out.println("静态代码块_RSA私钥Base64编码:" + privateKeyStr);
+    }
+
+    // 不需要5s校验的静态代码块
+    static {
+        urls.add("test1");
     }
 
 
@@ -77,6 +92,19 @@ public class ObjectConverterConfig extends AbstractHttpMessageConverter<Object> 
         User user = new User(name,body);
         return user;
     }
+
+    // 校验5s间隔
+    public Object decryptRequest(String requestBody,Class<? extends Object> clazz) throws Exception{
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                .getRequest();
+        String url = request.getRequestURI();
+        if (!urls.contains(url)){
+            String key = "sys_repost_"+ MD5Util.MD5(url+"_"+requestBody);
+
+        }
+        return null;
+    }
+
 
     // 具体的返回的处理
     @Override
