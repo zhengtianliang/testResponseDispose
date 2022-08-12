@@ -6,6 +6,8 @@ import com.zheng.encry.RSAUtil;
 import com.zheng.pojo.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -15,7 +17,6 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -26,6 +27,8 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: ZhengTianLiang
@@ -33,13 +36,15 @@ import java.util.ArrayList;
  * @desc: 当返回的结果是 Object 的时候，(全部的返回实体都加上 这些处理)
  */
 
-//@Component  // 这个也是必须的，加入到spring的容器中去初始化
-public class ObjectConverterConfig extends AbstractHttpMessageConverter<Object> {
+@Component  // 这个也是必须的，加入到spring的容器中去初始化
+public class ObjectConverterConfigCopy extends AbstractHttpMessageConverter<Object> {
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
     private static final String publicKeyStr;
     private static final String privateKeyStr;
+    @Autowired
+    private RedisTemplate redisTemplate;
     // 免5秒url校验的请求url的集合
     final static ArrayList<String> urls = new ArrayList();
 
@@ -66,7 +71,7 @@ public class ObjectConverterConfig extends AbstractHttpMessageConverter<Object> 
 
 
     // 这一步很重要，没有的话，就不会被注册进来，也就不会有作用
-    public ObjectConverterConfig(){
+    public ObjectConverterConfigCopy(){
         super(new MediaType("application","type-t",Charset.forName("UTF-8")));
     }
 
@@ -82,8 +87,12 @@ public class ObjectConverterConfig extends AbstractHttpMessageConverter<Object> 
     @Override
     protected Object readInternal(Class<?> aClass, HttpInputMessage httpInputMessage) throws IOException, HttpMessageNotReadableException {
         String json = StreamUtils.copyToString(httpInputMessage.getBody(), Charset.forName("UTF-8"));
-        if (StringUtils.isEmpty(json)){
-            return null;
+        if (!StringUtils.isEmpty(json)){
+            try {
+                return decryptRequest(json,aClass);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         logger.info("readInternal...:"+json);
         String[] split = json.split(",");
@@ -100,7 +109,11 @@ public class ObjectConverterConfig extends AbstractHttpMessageConverter<Object> 
         String url = request.getRequestURI();
         if (!urls.contains(url)){
             String key = "sys_repost_"+ MD5Util.MD5(url+"_"+requestBody);
-
+            Object o = redisTemplate.opsForValue().get(key);
+            if (!Objects.isNull(o)){
+                throw new RuntimeException("每5s只能点击一次哦");
+            }
+            redisTemplate.opsForValue().set(key,"随便写一个key",5, TimeUnit.SECONDS);
         }
         return null;
     }

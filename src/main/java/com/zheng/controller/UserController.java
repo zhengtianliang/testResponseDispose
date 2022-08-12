@@ -5,9 +5,12 @@ import com.zheng.pojo.TestUser;
 import com.zheng.pojo.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+//import org.springframework.web.client.RestTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 
 /**
  * @author: ZhengTianLiang
@@ -19,10 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @GetMapping("test1")
     public String test1(){
         System.out.println(123);
+        redisTemplate.opsForValue().set("1","222");
+        System.out.println(redisTemplate.opsForValue().get("1"));
+        System.out.println(redisTemplate.opsForValue().get("0"));
         return "mijao";
     }
 
@@ -42,8 +50,6 @@ public class UserController {
         logger.info("121113"+role);
         return role;
     }
-
-
 
     /**
      * @author: ZhengTianLiang
