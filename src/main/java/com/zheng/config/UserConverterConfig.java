@@ -22,7 +22,7 @@ import java.nio.charset.Charset;
  * @desc: 只对User做响应的加强的处理   (响应结果是其他的，不会被强化)
  */
 
-@Component
+//@Component
 public class UserConverterConfig extends AbstractHttpMessageConverter<User> {
 
     Logger logger =  LoggerFactory.getLogger(getClass());

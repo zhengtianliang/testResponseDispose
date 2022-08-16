@@ -3,6 +3,7 @@ package com.zheng.controller;
 import com.zheng.pojo.Role;
 import com.zheng.pojo.TestUser;
 import com.zheng.pojo.User;
+import com.zheng.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 //import org.springframework.web.client.RestTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
+
+import java.util.List;
 
 /**
  * @author: ZhengTianLiang
@@ -24,6 +27,8 @@ public class UserController {
     protected Logger logger = LoggerFactory.getLogger(getClass());
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private UserService userService;
 
     @GetMapping("test1")
     public String test1(){
@@ -76,5 +81,14 @@ public class UserController {
         return user;
     }
 
+    /**
+     * @author: ZhengTianLiang
+     * @date: 2022/08/16 17:02
+     * @desc: 测试service中记录sql的日志
+     */
+    @GetMapping(value = "/test6")
+    public List<User> userList(){
+        return userService.userList();
+    }
 
 }

@@ -93,19 +93,6 @@ public class ObjectConverterConfig extends AbstractHttpMessageConverter<Object> 
         return user;
     }
 
-    // 校验5s间隔
-    public Object decryptRequest(String requestBody,Class<? extends Object> clazz) throws Exception{
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                .getRequest();
-        String url = request.getRequestURI();
-        if (!urls.contains(url)){
-            String key = "sys_repost_"+ MD5Util.MD5(url+"_"+requestBody);
-
-        }
-        return null;
-    }
-
-
     // 具体的返回的处理
     @Override
     protected void writeInternal(Object o, HttpOutputMessage httpOutputMessage) throws IOException, HttpMessageNotWritableException {
