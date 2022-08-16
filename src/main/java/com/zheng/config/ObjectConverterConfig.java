@@ -87,7 +87,7 @@ public class ObjectConverterConfig extends AbstractHttpMessageConverter<Object> 
         }
         logger.info("readInternal...:"+json);
         String[] split = json.split(",");
-        String name = split[0];
+        String name = split[0]+"123";
         String body = split[0];
         User user = new User(name,body);
         return user;
@@ -135,5 +135,10 @@ public class ObjectConverterConfig extends AbstractHttpMessageConverter<Object> 
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    protected boolean canRead(MediaType mediaType) {
+        return true;
     }
 }
